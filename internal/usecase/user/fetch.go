@@ -1,10 +1,3 @@
-// // Usecase : contract of functions in Usecase layer
-// type Usecase interface {
-// 	FetchUser(ctx context.Context, params mUser.User) (result mUser.Response, err error)
-// 	AddUser(ctx context.Context, params mUser.User) (lastID int64, err error)
-// 	GetUserLogin(ctx context.Context, params mUser.User) (err error)
-// }
-
 package user
 
 import (
@@ -37,26 +30,6 @@ func (a *userUC) FetchUser(ctx context.Context, params mUser.User) (result mUser
 		})
 	}
 
-	// totalData, err := a.mysqlUserRepo.CountUserByPhoneEmail(ctx, rUser.Param{
-	// 	Email: params.Email,
-	// })
-
-	// if err != nil || totalData <= 0 {
-	// 	totalData = 0
-	// 	log.Println("[User Repository] Fail to count data", err)
-	// 	return
-	// }
-
-	return
-}
-
-func (a *userUC) AddUser(ctx context.Context, params mUser.User) (lastID int64, err error) {
-	lastID, err = a.mysqlUserRepo.AddUser(ctx, rUser.Param{
-		Name:     params.Name,
-		Phone:    params.Phone,
-		Email:    params.Email,
-		Password: params.PasswordHash,
-	})
 	return
 }
 

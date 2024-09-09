@@ -8,7 +8,7 @@ import (
 )
 
 func (a *mysqlUserRepo) AddUser(ctx context.Context, params rUser.Param) (lastID int64, err error) {
-	err = addUserPrepareStmt.QueryRow(params.Name, params.Email, params.Phone, params.Password).Scan(&lastID)
+	err = addUserPrepareStmt.QueryRow(params.Name, params.Phone, params.Email, params.Password).Scan(&lastID)
 	if err != nil {
 		lastID = 0
 		return

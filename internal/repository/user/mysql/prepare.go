@@ -16,7 +16,7 @@ var (
 
 func (a *mysqlUserRepo) prepareFetchUserStmt() {
 	var err error
-	fetchUserPrepareStmt, err = a.MySqlConnection.Prepare("SELECT id, name, email, phone, created_at, updated_at FROM users WHERE email = ? or phone = ? ")
+	fetchUserPrepareStmt, err = a.MySqlConnection.Prepare("SELECT id, name, email, phone, created_at, updated_at,password_hash FROM users WHERE email = ? OR phone = ? ")
 	if err != nil {
 		log.Fatal("[User Repo] Prepare select statement fail :", err)
 	}

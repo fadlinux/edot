@@ -2,6 +2,8 @@ package user
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
 	"time"
 
 	"github/fadlinux/edot/common/util/config"
@@ -11,7 +13,16 @@ import (
 )
 
 func newDBConnection(driver, host string) (conn *sql.DB) {
-	conn, err := sql.Open(driver, host)
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+
+	// Create the database connection string
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPassword, dbHost, dbPort, dbName)
+
+	conn, err := sql.Open(driver, dsn)
 	if err != nil {
 		log.Fatalln("Failed to init mysql connection", err)
 	} else {

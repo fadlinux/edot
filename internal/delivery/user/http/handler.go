@@ -2,8 +2,9 @@ package http
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -14,7 +15,6 @@ import (
 	mUser "github/fadlinux/edot/internal/model/user"
 
 	"github.com/julienschmidt/httprouter"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // HandleUserRegister : handler for user register
@@ -79,29 +79,26 @@ func (d Delivery) HandleUserRegister(w http.ResponseWriter, req *http.Request, p
 		Email: dataReq.Email,
 	})
 
+	result.Header.ProcessTime = time.Since(startTime).Seconds() * 1000
 	if totalData > 0 {
 		result.Header.Message = "Email and phone data already exist, please input another data"
 		result.Header.StatusCode = 400
 		result.Header.ProcessTime = time.Since(startTime).Seconds() * 1000
 		cHttp.Render(w, result, 0, req.FormValue("callback"))
 		return
-	} else {
-
-		//password convert to bcrypt
-		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(dataReq.PasswordHash), 12)
-		_, _ = d.userUC.AddUser(context.Background(), mUser.User{
-			Name:         dataReq.Name,
-			Phone:        dataReq.Phone,
-			Email:        dataReq.Email,
-			PasswordHash: string(hashedPassword),
-		})
-
-		result.Header.Message = "Success, Create user!"
-		result.Header.StatusCode = 200
-
-		cHttp.Render(w, result, 0, req.FormValue("callback"))
-		return
 	}
+
+	_, _ = d.userUC.AddUser(context.Background(), mUser.User{
+		Name:         dataReq.Name,
+		Phone:        dataReq.Phone,
+		Email:        dataReq.Email,
+		PasswordHash: getMD5Hash(password),
+	})
+
+	result.Header.Message = "Success, Create user!"
+	result.Header.StatusCode = 200
+
+	cHttp.Render(w, result, 0, req.FormValue("callback"))
 
 }
 
@@ -111,7 +108,6 @@ func (d Delivery) HandleUserLogin(w http.ResponseWriter, req *http.Request, para
 	var err error
 	var result mUser.Response
 	var dataReq mUser.User
-	//var totalData int64
 
 	decoder := json.NewDecoder(req.Body)
 	err = decoder.Decode(&dataReq)
@@ -146,30 +142,43 @@ func (d Delivery) HandleUserLogin(w http.ResponseWriter, req *http.Request, para
 		return
 	}
 
-	//password convert to bcrypt
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(dataReq.PasswordHash), 12)
+	hashedPassword := getMD5Hash(dataReq.PasswordHash)
 	result, _ = d.userUC.FetchUser(context.Background(), mUser.User{
 		Phone: dataReq.Phone,
 		Email: dataReq.Email,
 	})
-	abc := len(result.Data)
-	if abc > 0 {
-		fmt.Println("hashedPassword:L ", string(hashedPassword), result.Data)
-		if err = bcrypt.CompareHashAndPassword([]byte(result.Data[0].Password), []byte(hashedPassword)); err != nil {
-			// If the two passwords don't match, return a 401 status
-			fmt.Print("wo")
+
+	checkData := len(result.Data)
+	if checkData > 0 {
+		pass := result.Data[0].Password
+		if pass == hashedPassword {
+			result.Header.Message = "success login"
+			result.Header.StatusCode = 200
+			cHttp.Render(w, result, 0, req.FormValue("callback"))
+			return
+		} else {
+			result.Data = []mUser.Data{}
+			result.Header.Message = "email/phone cannot exist"
+			result.Header.StatusCode = 400
+			result.Header.ProcessTime = time.Since(startTime).Seconds() * 1000
+			cHttp.Render(w, result, 0, req.FormValue("callback"))
+
+			return
 		}
+	} else {
+		result.Data = []mUser.Data{}
+		result.Header.Message = "email/phone cannot exist"
+		result.Header.StatusCode = 400
+		result.Header.ProcessTime = time.Since(startTime).Seconds() * 1000
+		cHttp.Render(w, result, 0, req.FormValue("callback"))
+
+		return
 	}
 
-	// if result.Data[0].Password == string(hashedPassword) {
-	// 	result.Header.Message = "user logged"
-	// 	result.Header.StatusCode = 200
-	// } else {
-	result.Header.Message = "email/phone cannot exist"
-	result.Header.StatusCode = 400
-	//}
+}
 
-	result.Header.ProcessTime = time.Since(startTime).Seconds() * 1000
-	cHttp.Render(w, result, 0, req.FormValue("callback"))
-
+func getMD5Hash(text string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
