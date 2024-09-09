@@ -68,8 +68,8 @@ func TestRender(t *testing.T) {
 }
 
 func TestCheckURLCode(t *testing.T) {
-	firstURL := "https://tokopedia/test/success"
-	secondURL := "https://tokopedia/test/failed"
+	firstURL := "https://domain/test/success"
+	secondURL := "https://domain/test/failed"
 
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()

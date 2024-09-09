@@ -153,7 +153,7 @@ func CheckURLCode(url string) (httpCode int) {
 	req = req.WithContext(ctx)
 	req.Header.Add("Accept", `text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8`)
 	req.Header.Add("User-Agent", `Mozilla/5.0 (X11; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0`)
-	req.Header.Add("Origin", "https://www.tokopedia.com")
+	req.Header.Add("Origin", "https://www.domain.com")
 
 	// Sends request.
 	client := &http.Client{}
