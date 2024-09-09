@@ -1,4 +1,4 @@
-# edotAPI eDot - Complete e-commerce and Stock Management System
+# eDot API - Complete e-commerce and Stock Management System
 
 #Requirement
 - Docker
