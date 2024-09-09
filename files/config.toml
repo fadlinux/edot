@@ -1,0 +1,10 @@
+[feature]
+    popular_timeout = 200
+    curated_whitelist_path = "/etc/admin/curated-user-whitelist/production.csv"
+    enable_intools_config = true
+    enable_zap_logger = false
+
+[mysql]
+    host = "root:@tcp(127.0.0.1:3306)/e_dot"
+    db_conn_max_lifetime = 10
+
